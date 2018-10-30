@@ -1,57 +1,95 @@
-import vtk
+from math import sqrt
+import re
 
-def geraListaTriangulos(listaVertices,listaArestas):
-  listaTriangulos = []
-  ladosTrianguloOk = 0
-  v1 = "0"
-  v2 = "0"
-  v3 = "0"
-  for vertice in listaVertices:
-    for aresta in listaArestas:
-        if aresta.find(vertice) != -1 :
-            ladoTriangulo = aresta.split("-")
-            ladosTrianguloOk += 1
-        if ladosTrianguloOk == 1:
-            v1 = ladoTriangulo[0]
-            v2 = ladoTriangulo[1]
-        if ladosTrianguloOk == 2:
-            v3 = ladoTriangulo[1]
-        if (aresta.find(v2) != -1) and (aresta.find(v3) != -1):
-            triangulo = [v1,v2,v3]
-            if triangulo not in listaTriangulos:
-                listaTriangulos.append(triangulo)
-  return listaTriangulos
+# trata a conexão com o arquivo
+def padronizaArquivo():
+    arquivo = open("dados.txt", "r")
+    linha = arquivo.readline() # pega as linhas do arquivo
+    linha = linha.replace("\n","")
+    lista_entradas = linha.split(" ")
+    arquivo.close() 
+    return lista_entradas
 
-def geraListaQuadrangulos(listaVertices,listaArestas):
-    listaQuadrangulos = []
-    ladosQuadranguloOk = 0
-    v1 = "0"
-    v2 = "0"
-    v3 = "0"
-    v4 = "0"
-    for vertice in listaVertices:
-      for aresta in listaArestas:
-        if aresta.find(vertice) != -1 :
-          ladoQuadrangulo = aresta.split("-")
-          ladosQuadranguloOk += 1
-        if ladosQuadranguloOk == 1:
-          v1 = ladoQuadrangulo[0]
-          v2 = ladoQuadrangulo[1]
-        if ladosQuadrangulosOk == 2:
-          v3 = ladoQuadrangulo[1]
-        if (aresta.find(v2) != -1) and :
-            if quadrangulo not in listaQuadrangulos:
-                listaQuadrangulos.append(quadrangulo)
-    return listaQuadrangulos
+# pega somente os vertices
+def getListavertice(lista_arestas):
+    lista_vertices = []
+    lista_arestas_sep = []
+    for v in lista_arestas:
+        s = re.split("-", v)
+        s = [int(s[0]), int(s[1])]
+        lista_arestas_sep.append(s)
+        for v2 in s:
+            lista_vertices.append(int(v2))
+            
+    lista_vertices.sort()
+    lista_vertices = list(set(lista_vertices))
+    return lista_vertices, lista_arestas_sep
 
+# retira valores duplicados de listas de listas
+def Retira_valores_duplicados(lista_original):
+    lista = lista_original.copy()
+    tamanho = len(lista)
+    pos = 0
+    while True:
+        if pos >= tamanho:
+            break
+            
+        v = lista[pos]
+        if v in lista[pos+1:tamanho]:
+            indice = lista.index(v)
+            lista.pop(indice)
+            tamanho = len(lista)
+        else:
+            pos = pos + 1
+        
+    return lista
 
-arquivo = open("dados.txt","r")
-dados = arquivo.read() #Recebe string com arestas
-listaArestas = dados.split(" ")
-dados = dados.replace(" ","-") #Troca espacos por -
-listaVertices = dados.split("-") #Transforma string em lista
-listaVertices = list(set(listaVertices)) #Retira vertices duplicados
-print(listaArestas)
-print(listaVertices)
-listaTriangulos = geraListaTriangulos(listaVertices,listaArestas)
-print(listaTriangulos)
+# OBS: TANTO O TRIANGULO QUANTO O QUADRANGULO SÓ FUNCIONAM SE EU ESCOLHER UM VÉRTICE QUALQUER
+# E COLOCAR TODOS OS SEGMENTOS LIGADOS A ESSE VÉRTICE EM SEQUÊNCIA.
+def geraListaTriangulos(listaArestas):
+    lista_triangulos = []
+    tamanho = len(lista_arestas)
+    pos = 0
+    for segmentosFixo in listaArestas:
+        for segmentosV in lista_arestas[pos+1:tamanho]:
+            temp1 = []
+            temp2 = []
+            valor_deletado = -1
+            v1 = segmentosFixo[0]
+            v2 = segmentosFixo[1]
+            entrou = False
+
+            if v1 in segmentosV:
+                indice1 = segmentosV.index(v1)
+                temp1 = segmentosV.copy()
+                valor_deletado = temp1.pop(indice1)
+
+                temp2 = segmentosFixo.copy()
+                temp2.pop(0)
+
+                temp1.extend(temp2)
+                temp1.sort()
+                entrou = True
+
+            elif v2 in segmentosV:
+                indice2 = segmentosV.index(v2)
+
+                temp1 = segmentosV.copy()
+                valor_deletado = temp1.pop(indice2)
+
+                temp2 = segmentosFixo.copy()
+                temp2.pop(1)
+
+                temp1.extend(temp2)
+                temp1.sort()
+
+                entrou = True
+
+            if entrou == True:
+                if temp1 in lista_arestas:
+                    temp1.append(valor_deletado)
+                    temp1.sort()
+                    lista_triangulos.append(temp1)
+        pos = pos + 1
+
+    return Retira_valores_duplicados(lista_triangulos)
