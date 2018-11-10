@@ -93,3 +93,60 @@ def geraListaTriangulos(listaArestas):
         pos = pos + 1
 
     return Retira_valores_duplicados(lista_triangulos)
+
+# coloca os quadrangulos no formato correto
+def filtro_quadrangulo(listaQuad, listaTriangulos):
+    if len(listaQuadrangulos) == 0:
+        return listaQuad
+    
+    # vertique que não pertence ao quadrangulo
+    vert_notIn = []
+    new_quad = []
+    indice = 0
+    listaQuadrangulos = listaQuad.copy()
+    size = len(listaQuadrangulos)
+    
+    while True:
+        controle = False
+        for triangulo in listaTriangulos:
+            count = 0
+            v1 = triangulo[0]
+            v2 = triangulo[1]
+            v3 = triangulo[2]
+            
+            if v1 in listaQuadrangulos[indice]:
+                count = count + 1
+            else:
+                vert_notIn.append(v1)
+            
+            if v2 in listaQuadrangulos[indice]:
+                count = count + 1
+            else:
+                vert_notIn.append(v2)
+            
+            if v3 in listaQuadrangulos[indice]:
+                count = count + 1
+            else:
+                vert_notIn.append(v3) 
+            
+            if count == 3:
+                listaQuadrangulos.pop(indice)
+                size= size-1
+                controle=True
+                break
+            elif count == 2:
+                if len(vert_notIn) == 2:
+                    if vert_notIn[0] == vert_notIn[1]:
+                        listaQuadrangulos.pop(indice)
+                        vert_notIn = []
+                        size= size-1
+                        controle=True
+                        break
+                        
+        if controle == False:
+            indice = indice + 1
+        
+        if indice  >= size:
+            break
+            
+    return listaQuadrangulos
